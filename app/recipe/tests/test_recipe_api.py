@@ -3,9 +3,9 @@ Tests for recipe API
 """
 
 from decimal import Decimal
-
+from unittest.mock import patch
 from django.contrib.auth import get_user_model
-
+from core import models
 from django.test import TestCase
 from django.urls import reverse
 
@@ -138,3 +138,12 @@ class PrivateRecipeAPITests(TestCase):
         self.assertEqual(recipe.title, payload['title'])
         self.assertEqual(recipe.link, original_link)
         self.assertEqual(recipe.user, self.user)
+
+    @patch('core.models.uuid.uuid3')
+    def test_recipe_file_name_uuid(self, mock_uuid):
+        """Test generating image path"""
+        uuid = 'test-uuid'
+        mock_uuid.return_value = uuid
+        file_path = models.recipe_image_file_path(None, 'example.jpg')
+
+        self.assertEqual(file_path, f'uploads/recipe/{uuid}.jpg')
